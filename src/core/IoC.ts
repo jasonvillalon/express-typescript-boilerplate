@@ -121,16 +121,16 @@ export class IoC {
             .whenTargetNamed(name);
     }
 
-    private bindFiles(path: string, target: any, callback: (name: any, value: any) => void): Promise<void> {
+    private bindFiles(filePath: string, target: any, callback: (name: any, value: any) => void): Promise<void> {
         return new Promise<void>((resolve) => {
-            this.getFiles(path, (files: string[]) => {
+            this.getFiles(filePath, (files: string[]) => {
                 files.forEach((file: any) => {
                     let fileExport;
                     let fileClass;
                     let fileTarget;
                     const isRecursive = file.name.indexOf('.') > 0;
                     try {
-                        fileExport = require(`${file.path}`);
+                        fileExport = require(`${file.filePath}`);
                     } catch (e) {
                         this.log.warn(e.message);
                         return;
@@ -184,32 +184,31 @@ export class IoC {
     }
 
     private getBasePath(): string {
-        const baseFolder = __dirname.indexOf('/src/') >= 0 ? '/src/' : '/dist/';
+        const baseFolder = __dirname.indexOf(`${path.sep}src${path.sep}`) >= 0 ? `${path.sep}src${path.sep}` : `${path.sep}dist${path.sep}`;
         const baseRoot = __dirname.substring(0, __dirname.indexOf(baseFolder));
         return path.join(baseRoot, baseFolder, 'api');
     }
 
-    private getFiles(path: string, done: (files: any[]) => void): void {
-        const isTypeScript = __dirname.indexOf('/src/') >= 0;
+    private getFiles(filePath: string, done: (files: any[]) => void): void {
+        const isTypeScript = __dirname.indexOf(`${path.sep}src${path.sep}`) >= 0;
         if (!isTypeScript) {
-            path = path.replace('.ts', '.js');
+            filePath = filePath.replace('.ts', '.js');
         }
-        glob(this.getBasePath() + path, (err: any, files: string[]) => {
+        glob(this.getBasePath() + filePath, (err: any, files: string[]) => {
             if (err) {
-                this.log.warn(`Could not read the folder ${path}!`);
+                this.log.warn(`Could not read the folder ${filePath}!`);
                 return;
             }
             done(files.map((p: string) => this.parseFilePath(p)));
         });
     }
 
-    private parseFilePath(path: string): any {
-        const filePath = path.substring(this.getBasePath().length + 1);
-        const dir = filePath.split('/')[0];
-        const file = filePath.substr(dir.length + 1);
+    private parseFilePath(filePath: string): any {
+        const p = filePath.substring(this.getBasePath().length + 1);
+        const dir = p.split('/')[0];
+        const file = p.substr(dir.length + 1);
         const name = file.replace('/', '.').substring(0, file.length - 3);
         return {
-            path,
             filePath,
             dir,
             file,

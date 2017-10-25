@@ -7,15 +7,15 @@ import { Environment } from './helpers/Environment';
 export class SwaggerUI {
 
     public static getRoute(): string {
-        return path.join(process.env.APP_URL_PREFIX, process.env.SWAGGER_ROUTE);
+        return process.env.APP_URL_PREFIX + process.env.SWAGGER_ROUTE;
     }
 
     public setup(app: express.Application): void {
         if (Environment.isTruthy(process.env.SWAGGER_ENABLED)) {
-            const baseFolder = __dirname.indexOf('/src/') >= 0 ? '/src/' : '/dist/';
+            const baseFolder = __dirname.indexOf(`${path.sep}src${path.sep}`) >= 0 ? `${path.sep}src${path.sep}` : `${path.sep}dist${path.sep}`;
             const basePath = __dirname.substring(0, __dirname.indexOf(baseFolder));
             const swaggerFile = require(path.join(basePath, process.env.SWAGGER_FILE));
-            const packageJson = require(path.join(basePath, '/package.json'));
+            const packageJson = require(path.join(basePath, 'package.json'));
 
             // Add npm infos to the swagger doc
             swaggerFile.info = {

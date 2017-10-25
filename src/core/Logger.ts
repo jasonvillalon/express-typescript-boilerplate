@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 /**
  * core.log.Log
  * ------------------------------------------------
@@ -29,16 +31,16 @@ export class Logger {
     private static Adapter: interfaces.LoggerAdapterConstructor;
     private static Adapters: Map<string, interfaces.LoggerAdapterConstructor> = new Map();
 
-    private static parsePathToScope(path: string): string {
-        if (path.indexOf('/') >= 0) {
-            path = path.replace(process.cwd(), '');
-            path = path.replace('/src/', '');
-            path = path.replace('/dist/', '');
-            path = path.replace('.ts', '');
-            path = path.replace('.js', '');
-            path = path.replace(/\//g, ':');
+    private static parsePathToScope(filepath: string): string {
+        if (filepath.indexOf(path.sep) >= 0) {
+            filepath = filepath.replace(process.cwd(), '');
+            filepath = filepath.replace(`${path.sep}src${path.sep}`, '');
+            filepath = filepath.replace(`${path.sep}dist${path.sep}`, '');
+            filepath = filepath.replace('.ts', '');
+            filepath = filepath.replace('.js', '');
+            filepath = filepath.replace(path.sep, ':');
         }
-        return path;
+        return filepath;
     }
 
     private scope: string;
